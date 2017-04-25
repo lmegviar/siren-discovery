@@ -2,37 +2,29 @@ var mongoose = require('mongoose');
 var db = require('./db');
 var Schema = mongoose.Schema;
 // SCHEMAS----------------------------------------------------
-var usersSchema = Schema({
-  username: { type: String, required: true, index: { unique: true } },
-  podcasts: [Number],
-  genres: Schema.Types.Mixed,
-  content: Schema.Types.Mixed
-});
-
 var podcastsSchema = Schema({
-  // collectionId: {type: Number, required: true, index: {unique: true} },
-  // collectionName: {type: String},
-  // artistId: {type: String},
-  // artistName: {type: String},
-  // feedUrl: {type: String},
-  // primaryGenreName: {type: String},
-  // artworkUrl100: {type: String},
-  // artwrokUrl600: {type: String},
   podcastObj: Schema.Types.Mixed,
+  name: String,
+  podcastId: Number,
   description: String,
   content: [String],
   genres: [String]
 });
 
-var wordsSchema = Schema({
-  content: Schema.Types.Mixed,
-  genres: Schema.Types.Mixed
+var genresSchema = Schema({
+  genre: String,
+  podcasts: [Number]
+});
+
+var contentSchema = Schema({
+  content: String,
+  podcasts: [Number]
 });
 
 // MODELS--------------------------------------------------
-exports.Users = mongoose.model('Users', usersSchema);
-exports.Podcasts = mongoose.model('Podcasts', podcastsSchema);
-exports.Words = mongoose.model('Words', wordsSchema);
+exports.Podcast = mongoose.model('Podcasts', podcastsSchema);
+exports.Genre = mongoose.model('Genres', genresSchema);
+exports.Content = mongoose.model('Content', contentSchema);
 
 //NOTES----------------------------------------------------
 //Mixed type objects:
