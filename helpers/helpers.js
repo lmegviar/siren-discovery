@@ -25,6 +25,21 @@ var getFeed = function (req, res) {
   });
 };
 
+var getHighestKeys = (obj) => {
+  n = undefined;
+  Object.keys(obj).forEach(function(o) {
+    if (!n) {
+      n = obj[o];
+    } else if (n < obj[o]){
+      n = obj[o];
+    }
+  });
+  j = Object.keys(obj).filter(function(o) {
+    return obj[o] == n
+  })
+  return(j)
+};
+
 var saveDescriptions = function (url, id) {
   var description = '';
   return new Promise((resolve, reject) => {
@@ -33,12 +48,20 @@ var saveDescriptions = function (url, id) {
         console.error('Network error', err);
         reject(err);
       }
-     parsePodcast(data, (err, feed) => {
+      parsePodcast(data, (err, feed) => {
       if (err) {
         console.error('Parsing error', err);
-        return;
+        reject(err);
       }
-      description = (feed.title + ' ' + feed.description.long);
+      if (feed) {
+        if (feed.title && feed.description.long) {
+          description = (feed.title + ' ' + feed.description.long);
+        } else if (feed.title && !feed.description.long) {
+          description = (feed.title);
+        } else if (!feed.title && feed.description.long) {
+          description = (feed.description.long);
+        }
+      }
       Podcast.findOne({_id: id}, (err, podcast) => {
         podcast.description = description;
         podcast.save();
@@ -65,13 +88,13 @@ var getContentAndGenres = function (podcast) {
 var addWords = function (podcast) {
   podcast.genres.forEach((genre) => {
    Genre.findOne({genre: genre}, (err, record) => {
-      if (err) handleError(err);
+      if (err) {console.log(err)};
       if (!record) {
         var newRecord = new Genre({genre: genre, podcasts: [podcast.podcastId]});
         console.log('New genre record created for ' + genre + '!');
-        newRecord.save((err) => {if (err) handleError(err);})
+        newRecord.save((err) => {if (err) {console.log(err)};})
       } else {
-        record.podcasts = record.podcasts.push(podcast.podcastId);
+        record.podcasts.push(podcast.podcastId);
         record.podcasts = _.uniq(record.podcasts);
         record.save();
       }
@@ -79,13 +102,13 @@ var addWords = function (podcast) {
   });
   podcast.content.forEach((contentWord) => {
    Content.findOne({content: contentWord}, (err, record) => {
-      if (err) handleError(err);
+      if (err) {console.log(err)};
       if (!record) {
         var newRecord = new Content({content: contentWord, podcasts: [podcast.podcastId]});
         console.log('New content record created for ' + contentWord + '!');
         newRecord.save((err) => {if (err) handleError(err);})
       } else {
-        record.podcasts = record.podcasts.push(podcast.podcastId);
+        record.podcasts.push(podcast.podcastId);
         record.podcasts = _.uniq(record.podcasts);
         record.save();
       }
@@ -156,17 +179,25 @@ var addPodcast = function (podcast) {
   var genres = podcast.genres;
   var content = [];
   delete podcast.genres;
-  Podcast.findOne({podcastId: podcast.collectionId}, (err, record) => {
-    if (err) handleError(err);
-    if (!record) {
-      var newRecord = new Podcast({podcastObj: podcast, podcastId: podcast.collectionId, genres: genres, content: []});
-      newRecord.save((err) => {if (err) handleError(err); id = newRecord._id;})
-      .then (() => {
-        Podcast.findOne({_id: id})
+
+  return new Promise((resolve, reject) => {
+    Podcast.findOne({podcastId: podcast.collectionId})
+    .then((record) => {
+      if (!record) {
+        var newRecord = new Podcast({
+          podcastObj: podcast,
+          podcastId: podcast.collectionId,
+          genres: genres,
+          content: []
+        });
+
+        newRecord.save()
+        .then(saved => {
+          id = saved._id;
+          return Podcast.findOne({_id: id})
+        })
         .then((record) => {
           podcastRecord = record;
-        })
-        .then(() => {
           var url = podcastRecord.podcastObj.feedUrl;
           return saveDescriptions(url, podcastRecord._id)
         })
@@ -174,24 +205,29 @@ var addPodcast = function (podcast) {
           return getContent(data.id, data.description);
         })
         .then((concepts) => {
-          if (concepts) {
+          if (concepts.length) {
             content = content.concat(concepts);
             content = _.uniq(content);
-            Podcast.findOne({_id: id}, (err, podcast) => {
+            return Podcast.findOne({_id: id})
+            .then(podcast => {
               podcastRecord = podcast;
               podcast.content = content;
               podcast.save();
             })
             .then(() => {
-              addWords(podcastRecord);
+              return addWords(podcastRecord);
             })
           }
         })
-      })
-      .catch((err) => console.log(err));
-    } else {
-      console.log('Record already in database.');
-    }
+        .then(() => {
+          resolve();
+        })
+      } else {
+        console.log('Record already in database.');
+        resolve();
+      }
+    })
+    .catch(reject);
   })
 };
 
@@ -202,5 +238,6 @@ module.exports = {
   addWords: addWords,
   getContentAndGenres: getContentAndGenres,
   saveDescriptions: saveDescriptions,
-  getWordCount: getWordCount
+  getWordCount: getWordCount,
+  getHighestKeys: getHighestKeys
 }
