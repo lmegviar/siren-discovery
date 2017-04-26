@@ -2,11 +2,9 @@ var mongoose = require('mongoose');
 var Podcast = require('./config.js').Podcast;
 var Genre = require('./config.js').Genre;
 var Content = require('./config.js').Content;
-//address from Heroku
-// mongoose.connect('mongodb://127.0.0.1/discovery');
-mongoose.connect('mongodb://heroku_dg5mdmtc:rtcuj68jlij7kg61ph6dn1pdkg@ds117251.mlab.com:17251/heroku_dg5mdmtc');
 
-//Replace with mongoose db link in production: (ex: mongodb://heroku_3j87rzvb:1q53elhgre7kevlup0jfmm8anu@ds129600.mlab.com:29600/heroku_3j87rzvb)
+mongoose.connect('mongodb://127.0.0.1/discovery');
+// mongoose.connect('mongodb://heroku_dg5mdmtc:rtcuj68jlij7kg61ph6dn1pdkg@ds117251.mlab.com:17251/heroku_dg5mdmtc');
 
 // CONNECT DATABASE
 var db = mongoose.connection;
