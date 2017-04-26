@@ -48,6 +48,10 @@ exports.getRecommendations = function(req, res) {
     console.log(' Content: ', content);
     genres = getWordCount('genre', genres);
     content = getWordCount('content', content);
+
+    console.log('TOP GENRES: ', genres);
+    console.log('TOP CONTENT: ', content);
+
     for (var i = 0; i < 1; i++) {
       topGenres = getHighestKeys(genres);
       topContent = getHighestKeys(content);
@@ -88,7 +92,7 @@ exports.getRecommendations = function(req, res) {
     return Promise.all(promises)
   })
   .then(() => {
-    recommended = _.filter(recommended, (r) => {
+    recommended =_.filter(recommended, (r) => {
       var keep = true;
       subscriptions.forEach((sub) => {
         if (r.collectionName === sub){
