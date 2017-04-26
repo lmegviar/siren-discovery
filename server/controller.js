@@ -50,14 +50,14 @@ exports.getRecommendations = function(req, res) {
       topGenres = getHighestKeys(genres);
       topContent = getHighestKeys(content);
       Object.keys(topGenres).forEach((key, i) => {
-        if (genres[key] === 1 && subscriptions.length > 3) {
+        if ((topGenres[key] === 1 && subscriptions.length > 3) || key === 'Podcasts') {
           topGenres.splice(i, 1);
         }
         delete genres[key];
       })
       Object.keys(topContent).forEach((key) => {
-        if (content[key] === 1 && subscriptions.length > 3) {
-          topGenres.splice(i, 1);
+        if (topContent[key] === 1 && subscriptions.length > 3) {
+          topContent.splice(i, 1);
         }
         delete content[key];
       })
