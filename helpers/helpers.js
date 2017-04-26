@@ -146,7 +146,6 @@ var getWordCount = function (type, array) {
 var getContent = function (id, description) {
   var username = '4de54bed-d64c-48d2-9c11-5aa6fafdfb11';
   var password = 'jeuLeIlI6Bqi';
-  console.log('Making call to Watson');
   var url = 'https://' + username + ':' + password + '@gateway.watsonplatform.net/natural-language-understanding/api/v1/analyze?version=2017-02-27';
   var body =  { text: description, features: { "concepts": { "limit": 10 } } }
   var options = {

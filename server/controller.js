@@ -44,14 +44,8 @@ exports.getRecommendations = function(req, res) {
     }));
   })
   Promise.all(promises).then(() => {
-    console.log('Genres: ', genres);
-    console.log(' Content: ', content);
     genres = getWordCount('genre', genres);
     content = getWordCount('content', content);
-
-    console.log('TOP GENRES: ', genres);
-    console.log('TOP CONTENT: ', content);
-
     for (var i = 0; i < 1; i++) {
       topGenres = getHighestKeys(genres);
       topContent = getHighestKeys(content);
@@ -68,6 +62,8 @@ exports.getRecommendations = function(req, res) {
         delete content[key];
       })
     }
+    console.log('TOP GENRES: ', genres);
+    console.log('TOP CONTENT: ', content);
     promises.length = 0;
     topGenres.forEach((genre) => {
       promises.push(Genre.find({genre: genre})
@@ -103,12 +99,10 @@ exports.getRecommendations = function(req, res) {
       subscriptions.forEach((sub) => {
         if (r.collectionName === sub){
           keep = false;
-          console.log('Removing ', sub);
         }
       });
       return keep;
     })
-    console.log('Recommended (first 2/20):', recommended.slice(0,2));
     res.send(recommended.slice(0, 20));
   })
   .catch((err) => console.log(err));
