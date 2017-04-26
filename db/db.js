@@ -3,8 +3,8 @@ var Podcast = require('./config.js').Podcast;
 var Genre = require('./config.js').Genre;
 var Content = require('./config.js').Content;
 
-mongoose.connect('mongodb://127.0.0.1/discovery');
-// mongoose.connect('mongodb://heroku_dg5mdmtc:rtcuj68jlij7kg61ph6dn1pdkg@ds117251.mlab.com:17251/heroku_dg5mdmtc');
+// mongoose.connect('mongodb://127.0.0.1/discovery');
+mongoose.connect('mongodb://heroku_dg5mdmtc:rtcuj68jlij7kg61ph6dn1pdkg@ds117251.mlab.com:17251/heroku_dg5mdmtc');
 
 // CONNECT DATABASE
 var db = mongoose.connection;
