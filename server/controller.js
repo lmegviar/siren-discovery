@@ -17,6 +17,9 @@ exports.addSubscription = function(req, res) {
   console.log('Subscription added.');
   var podcast = req.body
   addPodcast(podcast)
+  .then(() => {
+    res.send('Subscription added.');
+  })
   .catch((err) => console.log(err));
 };
 
@@ -30,14 +33,19 @@ exports.getRecommendations = function(req, res) {
   var genreCounts =[];
   var contentCounts = [];
   var promises = [];
+  var subscriptions = [];
   podcasts.forEach((podcast) => {
-    promises.push(addPodcast(podcast));
+    console.log('Evaluating subscribed podcast: ', podcast.name);
+    subscriptions.push(podcast.name);
+    // promises.push(addPodcast(podcast));
     promises.push(getContentAndGenres(podcast).then((words) => {
       genres = genres.concat(words.genres);
       content = content.concat(words.content);
     }));
   })
   Promise.all(promises).then(() => {
+    console.log('Genres: ', genres);
+    console.log(' Content: ', content);
     genres = getWordCount('genre', genres);
     content = getWordCount('content', content);
     for (var i = 0; i < 1; i++) {
@@ -50,12 +58,10 @@ exports.getRecommendations = function(req, res) {
         delete content[key];
       })
     }
-    console.log('Top Genres/Content', topGenres, topContent);
     promises.length = 0;
     topGenres.forEach((genre) => {
       promises.push(Genre.find({genre: genre})
       .then((records) => {
-        console.log('Genre record: ', records);
         records.forEach((record) => {
           recommended = recommended.concat(record.podcasts);
         })
@@ -65,7 +71,6 @@ exports.getRecommendations = function(req, res) {
       promises.push(Content.find({content: content})
       .then((records) => {
         records.forEach((record) => {
-          console.log('Content record: ', record);
           recommended = recommended.concat(record.podcasts);
         })
       }));
@@ -75,18 +80,26 @@ exports.getRecommendations = function(req, res) {
   .then(() => {
     recommended = _.uniq(recommended);
     promises.length = 0;
-    console.log('Recommended', recommended);
     promises = recommended.map((id, i) => {
       return Podcast.find({podcastId: id}).then((record) => {
-        console.log('Record: ', record[0]);
-        console.log('Record.podcastObj', record[0].podcastObj);
         recommended[i] = record[0].podcastObj
       });
     });
     return Promise.all(promises)
   })
   .then(() => {
-    res.send(recommended);
+    recommended = _.filter(recommended, (r) => {
+      var keep = true;
+      subscriptions.forEach((sub) => {
+        if (r.collectionName === sub){
+          keep = false;
+          console.log('Removing ', sub);
+        }
+      });
+      return keep;
+    })
+    console.log('Recommended (first 2/20):', recommended.slice(0,2));
+    res.send(recommended.slice(0, 20));
   })
   .catch((err) => console.log(err));
 

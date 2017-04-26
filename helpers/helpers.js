@@ -78,9 +78,12 @@ var getContentAndGenres = function (podcast) {
     var content= [];
     Podcast.findOne({name: podcast.name}, (err, record) => {
       if (err) reject (err);
-      genres = genres.concat(record.genres);
-      content = content.concat(record.content);
-      resolve({genres: genres, content: content});
+      if(!record){resolve({genres: [], content: []})}
+      else {
+        genres = genres.concat(record.genres);
+        content = content.concat(record.content);
+        resolve({genres: genres, content: content});
+      }
     })
   })
 };
@@ -162,11 +165,13 @@ var getContent = function (id, description) {
           reject(error);
         }
         var concepts = [];
-        response.body.concepts.forEach((concept) => {
-          if (concept.relevance > 0.6) {
-            concepts.push(concept.text);
-          }
-        });
+        if (response.body.concepts) {
+          response.body.concepts.forEach((concept) => {
+            if (concept.relevance > 0.6) {
+              concepts.push(concept.text);
+            }
+          });
+        }
         resolve(concepts);
     })
   })
@@ -187,6 +192,7 @@ var addPodcast = function (podcast) {
         var newRecord = new Podcast({
           podcastObj: podcast,
           podcastId: podcast.collectionId,
+          name: podcast.collectionName,
           genres: genres,
           content: []
         });
