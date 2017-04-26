@@ -4,7 +4,7 @@
   "description": "Recommendation engine for Siren podcast app",
   "main": "server.js",
   "scripts": {
-    "test": "test"
+    "start": "node server/server.js"
   },
   "author": "",
   "license": "ISC",
