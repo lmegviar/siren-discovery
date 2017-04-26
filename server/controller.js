@@ -62,8 +62,8 @@ exports.getRecommendations = function(req, res) {
         delete content[key];
       })
     }
-    console.log('TOP GENRES: ', genres);
-    console.log('TOP CONTENT: ', content);
+    console.log('TOP GENRES: ', topGenres);
+    console.log('TOP CONTENT: ', topContent);
     promises.length = 0;
     topGenres.forEach((genre) => {
       promises.push(Genre.find({genre: genre})
