@@ -29,16 +29,13 @@ module.exports = function(req, res) {
   })
   Promise.all(promises).then(() => {
     genres = getWordCount('genre', genres);
-
-    console.log('All genres: ', genres);
-    console.log('All content: ', content);
     Object.keys(genres).forEach((key, i) => {
       if (genres[key] > 1 && key !== 'Podcasts') {
         topGenres.push(key);
       }
     })
     topGenres = _.uniq(topGenres);
-    topContent = _.uniq(topContent);
+    topContent = _.uniq(content);
     console.log('TOP GENRES: ', topGenres);
     console.log('TOP CONTENT: ', topContent);
     promises.length = 0;
