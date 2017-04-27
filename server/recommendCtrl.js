@@ -86,7 +86,7 @@ module.exports = function(req, res) {
       });
       return keep;
     })
-    res.send(recommended.slice(0, 20));
+    res.send(recommended.slice(0, 15));
   })
   .catch((err) => console.log(err));
 };
