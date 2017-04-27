@@ -4,7 +4,7 @@ var Genre = require('./config.js').Genre;
 var Content = require('./config.js').Content;
 var config = require('../config.json');
 
-var mongoURL = process.env.MONGODB_URL || config.localDB;
+var mongoURL = process.env.MONGODB_URI || config.localDB;
 mongoose.connect(mongoURL);
 
 var db = mongoose.connection;
