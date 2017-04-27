@@ -36,19 +36,21 @@ module.exports = function(req, res) {
     for (var i = 0; i < 3; i++) {
       topGenres = topGenres.concat(getHighestKeys(genres));
       topContent = topGenres.concat(getHighestKeys(content));
-      Object.keys(topGenres).forEach((key, i) => {
-        if ((genres[key] === 1 && subscriptions.length > 4) || genres[key] === 'Podcasts') {
+      Object.keys(genres).forEach((key, i) => {
+        if ((genres[key] === 1 && subscriptions.length > 5) || key === 'Podcasts') {
           topGenres.splice(i, 1);
         }
         delete genres[key];
       })
-      Object.keys(topContent).forEach((key) => {
+      Object.keys(content).forEach((key) => {
         if (content[key] === 1 && subscriptions.length > 4) {
           topContent.splice(i, 1);
         }
         delete content[key];
       })
     }
+    topGenres = _.uniq(topGenres);
+    topContent = _.uniq(topContent);
     console.log('TOP GENRES: ', topGenres);
     console.log('TOP CONTENT: ', topContent);
     promises.length = 0;
