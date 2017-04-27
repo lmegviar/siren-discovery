@@ -139,6 +139,7 @@ var getContent = function (id, description) {
         reject(error);
       }
       var concepts = [];
+      console.log('WATSON RESPONSE: ', response);
       if (response.body.concepts) {
         response.body.concepts.forEach((concept) => {
           if (concept.relevance > 0.6) {
