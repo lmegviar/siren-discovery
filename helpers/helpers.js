@@ -1,47 +1,29 @@
-const chalk         = require('chalk');
-var db = require('../db/config.js');
-var Podcast = db.Podcast;
-var Genre = db.Genre;
-var Content = db.Content;
-var request = require('request');
 var parsePodcast = require('./node-podcast-parser');
+var config = require('../config.json');
+var db = require('../db/config.js');
+var request = require('request');
 var _ = require('lodash');
+var Podcast = db.Podcast;
+var Content = db.Content;
+var Genre = db.Genre;
 
-var getFeed = function (req, res) {
-  request(req.query.url, (err, response, data) => {
-    if (err) {
-      console.error('Network error', err);
-      return;
+var getHighestKeys = (object) => {
+  var count = Object.keys(object).reduce((highest, key) => {
+     if (!highest) {
+      highest = object[key];
+    } else if (highest < object[key]){
+      highest = object[key];
     }
-    parsePodcast(data, (err, podcast) => {
-      if (err) {
-        console.error('Parsing error', err);
-        return;
-      }
-      delete podcast.episodes;
-      console.log(chalk.yellow(podcast));
-      res.status(200).send(podcast);
-    });
-  });
-};
-
-var getHighestKeys = (obj) => {
-  n = undefined;
-  Object.keys(obj).forEach(function(o) {
-    if (!n) {
-      n = obj[o];
-    } else if (n < obj[o]){
-      n = obj[o];
-    }
-  });
-  j = Object.keys(obj).filter(function(o) {
-    return obj[o] == n
+    return highest;
+  }, 0);
+  var topKeys = Object.keys(object).filter(function(key) {
+    return object[key] === count;
   })
-  return(j)
+  return(topKeys)
+
 };
 
-var saveDescriptions = function (url, id) {
-  var description = '';
+var saveDescriptions = (url, id) => {
   return new Promise((resolve, reject) => {
     request(url, (err, response, data) => {
       if (err) {
@@ -55,7 +37,7 @@ var saveDescriptions = function (url, id) {
       }
       if (feed) {
         if (feed.title && feed.description.long) {
-          description = (feed.title + ' ' + feed.description.long);
+          var description = (feed.title + ' ' + feed.description.long);
         } else if (feed.title && !feed.description.long) {
           description = (feed.title);
         } else if (!feed.title && feed.description.long) {
@@ -67,9 +49,9 @@ var saveDescriptions = function (url, id) {
         podcast.save();
       })
       resolve({description: description, id: id});
+      });
     });
-    })
-  })
+  });
 };
 
 var getContentAndGenres = function (podcast) {
@@ -84,11 +66,11 @@ var getContentAndGenres = function (podcast) {
         content = content.concat(record.content);
         resolve({genres: genres, content: content});
       }
-    })
-  })
+    });
+  });
 };
 
-var addWords = function (podcast) {
+var saveGenres = (genres) => {
   podcast.genres.forEach((genre) => {
    Genre.findOne({genre: genre}, (err, record) => {
       if (err) {console.log(err)};
@@ -101,10 +83,13 @@ var addWords = function (podcast) {
         record.podcasts = _.uniq(record.podcasts);
         record.save();
       }
-    })
+    });
   });
+};
+
+var saveContent = (content) => {
   podcast.content.forEach((contentWord) => {
-   Content.findOne({content: contentWord}, (err, record) => {
+    Content.findOne({content: contentWord}, (err, record) => {
       if (err) {console.log(err)};
       if (!record) {
         var newRecord = new Content({content: contentWord, podcasts: [podcast.podcastId]});
@@ -115,11 +100,16 @@ var addWords = function (podcast) {
         record.podcasts = _.uniq(record.podcasts);
         record.save();
       }
-    })
-  })
+    });
+  });
 };
 
-var getWordCount = function (type, array) {
+var addWords = function (podcast) {
+  saveGenres(genre);
+  saveContent(content);
+};
+
+var getWordCount = (type, array) => {
   if (type = 'genre') {
     genres = {};
     array.forEach((genre) => {
@@ -141,13 +131,14 @@ var getWordCount = function (type, array) {
     });
     return content;
   }
-}
+};
 
 var getContent = function (id, description) {
-  var username = '4de54bed-d64c-48d2-9c11-5aa6fafdfb11';
-  var password = 'jeuLeIlI6Bqi';
-  var url = 'https://' + username + ':' + password + '@gateway.watsonplatform.net/natural-language-understanding/api/v1/analyze?version=2017-02-27';
-  var body =  { text: description, features: { "concepts": { "limit": 10 } } }
+  var features = { "concepts": { "limit": 10 } }
+  var body =  { text: description, features: features }
+  var url = 'https://' + username + ':' + password + config.watsonUrl;
+  var username = config.watsonUsername;
+  var password = config.watsonPassword;
   var options = {
     method: 'POST',
     json: true,
@@ -159,19 +150,19 @@ var getContent = function (id, description) {
   }
   return new Promise((resolve, reject) => {
     request(options, function (error, response, body) {
-        if (error) {
-          console.log('getContent Error: ', error);
-          reject(error);
-        }
-        var concepts = [];
-        if (response.body.concepts) {
-          response.body.concepts.forEach((concept) => {
-            if (concept.relevance > 0.6) {
-              concepts.push(concept.text);
-            }
-          });
-        }
-        resolve(concepts);
+      if (error) {
+        console.log('getContent Error: ', error);
+        reject(error);
+      }
+      var concepts = [];
+      if (response.body.concepts) {
+        response.body.concepts.forEach((concept) => {
+          if (concept.relevance > 0.6) {
+            concepts.push(concept.text);
+          }
+        });
+      }
+      resolve(concepts);
     })
   })
 };
@@ -195,7 +186,6 @@ var addPodcast = function (podcast) {
           genres: genres,
           content: []
         });
-
         newRecord.save()
         .then(saved => {
           id = saved._id;
@@ -206,9 +196,7 @@ var addPodcast = function (podcast) {
           var url = podcastRecord.podcastObj.feedUrl;
           return saveDescriptions(url, podcastRecord._id)
         })
-        .then((data) => {
-          return getContent(data.id, data.description);
-        })
+        .then((data) => getContent(data.id, data.description))
         .then((concepts) => {
           if (concepts.length) {
             content = content.concat(concepts);
@@ -219,14 +207,10 @@ var addPodcast = function (podcast) {
               podcast.content = content;
               podcast.save();
             })
-            .then(() => {
-              return addWords(podcastRecord);
-            })
+            .then(() => addWords(podcastRecord))
           }
         })
-        .then(() => {
-          resolve();
-        })
+        .then(resolve)
       } else {
         console.log('Record already in database.');
         resolve();
@@ -237,12 +221,8 @@ var addPodcast = function (podcast) {
 };
 
 module.exports = {
-  getFeed: getFeed,
   addPodcast: addPodcast,
-  getContent: getContent,
-  addWords: addWords,
   getContentAndGenres: getContentAndGenres,
-  saveDescriptions: saveDescriptions,
   getWordCount: getWordCount,
   getHighestKeys: getHighestKeys
 }

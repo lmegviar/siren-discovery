@@ -1,9 +1,10 @@
-var controller = require('./controller.js');
+var subscribeCtrl = require('./subscribeCtrl');
+var recommendCtrl = require('./recommendCtrl');
+var addCtrl = require('./addCtrl');
 var express = require('express')
 
 module.exports = function (app, express) {
-  app.post('/api/recommend', controller.getRecommendations);
-  app.post('/api/subscribe', controller.addSubscription);
-  app.post('/api/addPodcasts', controller.addPodcasts);
-  app.put('/api/exclude', controller.excludeRecommendation);
+  app.post('/api/recommend', recommendCtrl);
+  app.post('/api/subscribe', subscribeCtrl);
+  app.post('/api/addPodcasts', addCtrl);
 };
