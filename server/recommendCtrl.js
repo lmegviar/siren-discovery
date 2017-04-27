@@ -35,7 +35,7 @@ module.exports = function(req, res) {
     console.log('All content: ', content);
     for (var i = 0; i < 3; i++) {
       topGenres = topGenres.concat(getHighestKeys(genres));
-      topContent = topGenres.concat(getHighestKeys(content));
+      topContent = topContent.concat(getHighestKeys(content));
       Object.keys(genres).forEach((key, i) => {
         if ((genres[key] === 1 && subscriptions.length > 5) || key === 'Podcasts') {
           topGenres.splice(i, 1);
