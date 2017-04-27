@@ -33,6 +33,8 @@ module.exports = function(req, res) {
     content = getWordCount('content', content);
     topGenres = getHighestKeys(genres);
     topContent = getHighestKeys(content);
+    console.log('All genres: ', topGenres);
+    console.log('All content: ', topContent);
     Object.keys(topGenres).forEach((key, i) => {
       if ((topGenres[key] === 1 && subscriptions.length > 3) || key === 'Podcasts') {
         topGenres.splice(i, 1);
@@ -86,7 +88,7 @@ module.exports = function(req, res) {
       });
       return keep;
     })
-    res.send(recommended.slice(0, 15));
+    res.send(recommended.slice(0, 12));
   })
   .catch((err) => console.log(err));
 };
