@@ -7,22 +7,6 @@ var Podcast = db.Podcast;
 var Content = db.Content;
 var Genre = db.Genre;
 
-var getHighestKeys = (object) => {
-  var count = Object.keys(object).reduce((highest, key) => {
-     if (!highest) {
-      highest = object[key];
-    } else if (highest < object[key]){
-      highest = object[key];
-    }
-    return highest;
-  }, 0);
-  var topKeys = Object.keys(object).filter(function(key) {
-    return object[key] === count;
-  })
-  return(topKeys)
-
-};
-
 var saveDescriptions = (url, id) => {
   return new Promise((resolve, reject) => {
     request(url, (err, response, data) => {
@@ -223,6 +207,5 @@ var addPodcast = function (podcast) {
 module.exports = {
   addPodcast: addPodcast,
   getContentAndGenres: getContentAndGenres,
-  getWordCount: getWordCount,
-  getHighestKeys: getHighestKeys
+  getWordCount: getWordCount
 }

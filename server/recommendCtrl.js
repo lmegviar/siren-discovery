@@ -1,6 +1,5 @@
 var getContentAndGenres = require('../helpers/helpers.js').getContentAndGenres;
 var getWordCount        = require('../helpers/helpers.js').getWordCount;
-var getHighestKeys      = require('../helpers/helpers.js').getHighestKeys;
 var db                  = require('../db/config.js');
 var _                   = require('lodash');
 var Genre               = db.Genre;
@@ -30,18 +29,14 @@ module.exports = function(req, res) {
   })
   Promise.all(promises).then(() => {
     genres = getWordCount('genre', genres);
-    content = getWordCount('content', content);
+
     console.log('All genres: ', genres);
     console.log('All content: ', content);
-    for (var i = 0; i < 3; i++) {
-      topContent = topContent.concat(getHighestKeys(content));
-      Object.keys(genres).forEach((key, i) => {
-        if (genres[key] > 1 && key !== 'Podcasts') {
-          topGenres.push(key);
-        }
-        delete genres[key];
-      })
-    }
+    Object.keys(genres).forEach((key, i) => {
+      if (genres[key] > 1 && key !== 'Podcasts') {
+        topGenres.push(key);
+      }
+    })
     topGenres = _.uniq(topGenres);
     topContent = _.uniq(topContent);
     console.log('TOP GENRES: ', topGenres);
