@@ -31,22 +31,24 @@ module.exports = function(req, res) {
   Promise.all(promises).then(() => {
     genres = getWordCount('genre', genres);
     content = getWordCount('content', content);
-    topGenres = getHighestKeys(genres);
-    topContent = getHighestKeys(content);
-    console.log('All genres: ', topGenres);
-    console.log('All content: ', topContent);
-    Object.keys(topGenres).forEach((key, i) => {
-      if ((topGenres[key] === 1 && subscriptions.length > 3) || key === 'Podcasts') {
-        topGenres.splice(i, 1);
-      }
-      delete genres[key];
-    })
-    Object.keys(topContent).forEach((key) => {
-      if (topContent[key] === 1 && subscriptions.length > 3) {
-        topContent.splice(i, 1);
-      }
-      delete content[key];
-    })
+    console.log('All genres: ', genres);
+    console.log('All content: ', content);
+    for (var i = 0; i < 3; i++) {
+      topGenres = topGenres.concat(getHighestKeys(genres));
+      topContent = topGenres.concat(getHighestKeys(content));
+      Object.keys(topGenres).forEach((key, i) => {
+        if ((genres[key] === 1 && subscriptions.length > 4) || genres[key] === 'Podcasts') {
+          topGenres.splice(i, 1);
+        }
+        delete genres[key];
+      })
+      Object.keys(topContent).forEach((key) => {
+        if (content[key] === 1 && subscriptions.length > 4) {
+          topContent.splice(i, 1);
+        }
+        delete content[key];
+      })
+    }
     console.log('TOP GENRES: ', topGenres);
     console.log('TOP CONTENT: ', topContent);
     promises.length = 0;
