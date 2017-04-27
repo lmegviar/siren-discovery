@@ -120,9 +120,9 @@ var getWordCount = (type, array) => {
 var getContent = function (id, description) {
   var features = { "concepts": { "limit": 10 } }
   var body =  { text: description, features: features }
-  var url = 'https://' + username + ':' + password + config.watsonUrl;
   var username = config.watsonUsername;
   var password = config.watsonPassword;
+  var url = 'https://' + username + ':' + password + config.watsonUrl;
   var options = {
     method: 'POST',
     json: true,
