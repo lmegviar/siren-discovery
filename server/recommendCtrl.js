@@ -30,7 +30,7 @@ module.exports = function(req, res) {
   Promise.all(promises).then(() => {
     genres = getWordCount('genre', genres);
     Object.keys(genres).forEach((key, i) => {
-      if (genres[key] > 1 && key !== 'Podcasts') {
+      if ((genres[key] > 1 || subscriptions.length === 1) && key !== 'Podcasts') {
         topGenres.push(key);
       }
     })
