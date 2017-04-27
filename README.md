@@ -20,7 +20,7 @@ Connect to your local version of the project by replacing heroku url with localh
 
 #### Get Recommenations
 
-GET to http://siren-discovery.herokuapp.com/api/recommend
+POST to http://siren-discovery.herokuapp.com/api/recommend
 
 Request format: {name: [FULL NAME OF PODCAST AS FOUND ON iTUNES]}
 
