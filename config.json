@@ -1,7 +1,5 @@
 {
   "localDB": "mongodb://127.0.0.1/discovery",
   "iTunesUrl": "https://itunes.apple.com/search?entity=podcast&term=",
-  "watsonUsername": "4de54bed-d64c-48d2-9c11-5aa6fafdfb11",
-  "watsonPassword": "jeuLeIlI6Bqi",
   "watsonUrl": "@gateway.watsonplatform.net/natural-language-understanding/api/v1/analyze?version=2017-02-27"
 }
